@@ -11,6 +11,8 @@ environment:
 
 dependencies:
   pub_api: ^0.0.3
+  yaml: ^2.2.1
+  version: ^1.0.0
 
 dev_dependencies:
   pedantic: ^1.9.2
