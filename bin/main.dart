@@ -2,15 +2,17 @@ import 'dart:io';
 
 import 'package:github/github.dart';
 import 'package:pub_api/pub_api.dart';
-import 'package:version/version.dart';
-import 'package:yaml/yaml.dart';
+import 'package:pub_semver/pub_semver.dart';
+import 'package:pubspec_parse/pubspec_parse.dart';
 
 main() async {
-  final pubspec = loadYaml(await File('pubspec.yaml').readAsString());
-  final deps = pubspec['dependencies'];
+  final pubspec = Pubspec.parse(await File('pubspec.yaml').readAsString());
+  final deps = pubspec.dependencies;
   for (final name in deps.keys)
-    if ((await PubPackage.fromName(name)).latest.version >
-        Version.parse(deps[name].replaceFirst('^', '')))
+    if (deps[name] is HostedDependency &&
+            ((deps[name] as HostedDependency).version.isAny) ||
+        ((deps[name] as HostedDependency).version as VersionRange).min <
+            (await PubPackage.fromName(name)).latest.version)
       print(name + ' out of date');
   final github = GitHub();
   final gitRemote =

@@ -10,10 +10,10 @@ environment:
   sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
-  pub_api: ^0.0.3
-  yaml: ^2.2.1
-  version: ^1.0.0
+  pub_api: ^0.0.4
   github: ^6.0.0
+  pubspec_parse: ^0.1.4
+  pub_semver: any
 
 dev_dependencies:
   pedantic: ^1.9.2
