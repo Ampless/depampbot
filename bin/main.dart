@@ -5,12 +5,11 @@ import 'package:pub_api/pub_api.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
-Future<bool> versionIsOutdated(String name, VersionRange version) async =>
-    version.isAny ||
-    version.min < (await PubPackage.fromName(name)).latest.version;
+bool versionIsOutdated(PubPackage package, VersionRange version) =>
+    version.isAny || version.min < package.latest.version;
 
-Future<bool> dependencyIsOutdated(String name, HostedDependency dep) =>
-    versionIsOutdated(name, dep.version);
+bool dependencyIsOutdated(PubPackage package, HostedDependency dep) =>
+    versionIsOutdated(package, dep.version);
 
 Future<String> getGitRemoteUrl() async {
   final name = await Process.run('git', ['remote']);
@@ -30,17 +29,20 @@ Future<RepositorySlug> getGithubRepo() async {
 main() async {
   final pubspec = Pubspec.parse(await File('pubspec.yaml').readAsString());
   final deps = pubspec.dependencies;
-  for (final name in deps.keys)
-    if (await dependencyIsOutdated(name, deps[name]))
-      print(name + ' out of date');
   final github = GitHub();
   final repo = await getGithubRepo();
-  return;
-  github.issues.create(
-      repo,
-      IssueRequest(
-        title: 'depampbot dependency detected out of date',
-        body: 'The packages "bla" and "blabla" are out of date.',
-        labels: ['depampbot', 'enhancement'],
-      ));
+  for (final name in deps.keys) {
+    final package = await PubPackage.fromName(name);
+    if (await dependencyIsOutdated(package, deps[name])) {
+      print(name + ' out of date');
+      github.issues.create(
+          repo,
+          IssueRequest(
+            title: '[DepAmpBot] $name out of date',
+            body: 'The pub package "$name" is out of date, '
+                '${package.latest} is available.',
+            labels: ['depampbot', 'enhancement'],
+          ));
+    }
+  }
 }
