@@ -1,19 +1,17 @@
 name: depampbot
 description: A dependency management bot for Dart.
+version: 0.0.0-1
 homepage: https://github.com/Ampless/depampbot
-
 publish_to: 'none'
 
-version: 0.0.0-1
-
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: ^3.0.0
 
 dependencies:
-  pub_api: ^0.0.4
-  github: ^6.0.0
-  pubspec_parse: ^0.1.4
-  pub_semver: any
+  pub_api: ^0.1.0
+  github: ^9.0.0
+  pubspec_parse: ^1.0.0
+  pub_semver: ^2.0.0
 
 dev_dependencies:
-  pedantic: ^1.9.2
+  lints: ^5.0.0

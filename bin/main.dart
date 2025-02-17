@@ -5,8 +5,8 @@ import 'package:pub_api/pub_api.dart';
 import 'package:pub_semver/pub_semver.dart';
 import 'package:pubspec_parse/pubspec_parse.dart';
 
-bool versionIsOutdated(PubPackage package, VersionRange version) =>
-    version.isAny || version.min < package.latest.version;
+bool versionIsOutdated(PubPackage package, VersionConstraint version) =>
+    version.isAny || !version.allows(package.latest.version);
 
 bool dependencyIsOutdated(PubPackage package, HostedDependency dep) =>
     versionIsOutdated(package, dep.version);
@@ -32,8 +32,9 @@ main() async {
   final github = GitHub();
   final repo = await getGithubRepo();
   for (final name in deps.keys) {
+    if (deps[name] is! HostedDependency) continue;
     final package = await PubPackage.fromName(name);
-    if (await dependencyIsOutdated(package, deps[name])) {
+    if (await dependencyIsOutdated(package, deps[name] as HostedDependency)) {
       print(name + ' out of date');
       github.issues.create(
           repo,
